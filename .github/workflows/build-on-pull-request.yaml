@@ -12,9 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]' || github.actor == 'Citrinae-Lime'
-    strategy:
-      matrix:
-        os: win64
         
     steps:
       - name: Checkout repository
@@ -48,7 +45,7 @@ jobs:
         run: echo date-time=$(date +'%Y-%m-%d %H:%M') >> $GITHUB_OUTPUT
         
       - name: Compile FFmpeg using ffmpeg-windows-build-helpers
-        run: ./cross_compile_ffmpeg.sh --ffmpeg-source-dir=$GITHUB_WORKSPACE/ffmpeg-source --gcc-cpu-count=$(nproc) --sandbox-ok=y --compiler-flavors=${{ matrix.os }}
+        run: ./cross_compile_ffmpeg.sh --ffmpeg-source-dir=$GITHUB_WORKSPACE/ffmpeg-source --gcc-cpu-count=$(nproc) --sandbox-ok=y --compiler-flavors=win64
         
       - name: Get current date & time after build
         id: date-time-after
@@ -56,22 +53,22 @@ jobs:
           echo date-time=$(date +'%Y-%m-%d %H:%M') >> $GITHUB_OUTPUT
           echo date-time-tag=$(date +'%Y-%m-%d-%H-%M') >> $GITHUB_OUTPUT
           
-      - name: Upload FFmpeg ${{ matrix.os }} nonfree
+      - name: Upload FFmpeg win64 nonfree
         uses: actions/upload-artifact@v3
         with:
-          name: ffmpeg-${{ steps.git-sha-date.outputs.git-sha }}-${{ steps.helper-git-sha.outputs.git-sha }}-${{ matrix.os }}-nonfree
+          name: ffmpeg-${{ steps.git-sha-date.outputs.git-sha }}-${{ steps.helper-git-sha.outputs.git-sha }}-win64-nonfree
           path: ffmpeg-source/ffmpeg.exe
           
-      - name: Upload FFprobe ${{ matrix.os }} nonfree
+      - name: Upload FFprobe win64 nonfree
         uses: actions/upload-artifact@v3
         with:
-          name: ffprobe-${{ steps.git-sha-date.outputs.git-sha }}-${{ steps.helper-git-sha.outputs.git-sha }}-${{ matrix.os }}-nonfree
+          name: ffprobe-${{ steps.git-sha-date.outputs.git-sha }}-${{ steps.helper-git-sha.outputs.git-sha }}-win64-nonfree
           path: ffmpeg-source/ffprobe.exe
           
-      - name: Upload FFplay ${{ matrix.os }} nonfree
+      - name: Upload FFplay win64 nonfree
         uses: actions/upload-artifact@v3
         with:
-          name: ffplay-${{ steps.git-sha-date.outputs.git-sha }}-${{ steps.helper-git-sha.outputs.git-sha }}-${{ matrix.os }}-nonfree
+          name: ffplay-${{ steps.git-sha-date.outputs.git-sha }}-${{ steps.helper-git-sha.outputs.git-sha }}-win64-nonfree
           path: ffmpeg-source/ffplay.exe
           
     outputs:
@@ -90,29 +87,29 @@ jobs:
         os: win64
         
     steps:
-      - name: Download FFmpeg ${{ matrix.os }} nonfree
+      - name: Download FFmpeg win64 nonfree
         uses: actions/download-artifact@v3
         with:
-          name: ffmpeg-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-${{ matrix.os }}-nonfree
+          name: ffmpeg-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-win64-nonfree
           
-      - name: Download FFprobe ${{ matrix.os }} nonfree
+      - name: Download FFprobe win64 nonfree
         uses: actions/download-artifact@v3
         with:
-          name: ffprobe-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-${{ matrix.os }}-nonfree
+          name: ffprobe-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-win64-nonfree
           
-      - name: Download FFplay ${{ matrix.os }} nonfree
+      - name: Download FFplay win64 nonfree
         uses: actions/download-artifact@v3
         with:
-          name: ffplay-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-${{ matrix.os }}-nonfree
+          name: ffplay-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-win64-nonfree
           
-      - name: 7-Zip FFmpeg ${{ matrix.os }} nonfree
-        run: 7z a ffmpeg-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-${{ matrix.os }}-nonfree.7z ffmpeg.exe ffprobe.exe ffplay.exe -mx9
+      - name: 7-Zip FFmpeg win64 nonfree
+        run: 7z a ffmpeg-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-win64-nonfree.7z ffmpeg.exe ffprobe.exe ffplay.exe -mx9
         
-      - name: Upload FFmpeg archive ${{ matrix.os }} nonfree
+      - name: Upload FFmpeg archive win64 nonfree
         uses: actions/upload-artifact@v3
         with:
-          name: ffmpeg-archive-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-${{ matrix.os }}-nonfree
-          path: ffmpeg-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-${{ matrix.os }}-nonfree.7z
+          name: ffmpeg-archive-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-win64-nonfree
+          path: ffmpeg-${{ needs.build.outputs.git-sha }}-${{ needs.build.outputs.helper-git-sha }}-win64-nonfree.7z
           
   release:
     needs: [build, archive]
