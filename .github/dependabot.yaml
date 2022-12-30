@@ -4,12 +4,13 @@ updates:
     directory: /
     schedule:
       interval: daily
-      time: '09:00'
-      timezone: Asia/Manila
+      time: '15:00'
+      timezone: Africa/Ceuta
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
-      time: '09:00'
-      timezone: Asia/Manila
+      interval: weekly
+      day: friday
+      time: '10:00'
+      timezone: Africa/Ceuta
