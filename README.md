@@ -9,8 +9,7 @@
 
 #### Schedule
 
-Release builds: Weekly or Every time [ffmpeg-windows-build-helpers](https://github.com/rdp/ffmpeg-windows-build-helpers) updates or I updated the repository.\
-Pre-release builds: Every 9:00 AM GMT+8 daily except weekends.
+Release builds: Weekly or Every time [ffmpeg-windows-build-helpers](https://github.com/rdp/ffmpeg-windows-build-helpers) updates or I updated the repository.
 
 #### Release Retention Policy
 Release builds are kept for two years.\
