@@ -18,7 +18,7 @@ Last 1 pre-release build are kept every time a release build are released.
 
 ffmpeg, ffprobe, and ffplay are included.
 
-Nonfree builds with Fraunhofer FDK AAC (libfdk_aac) & DeckLink.
+Nonfree builds with Fraunhofer FDK AAC (libfdk_aac).
 
 All builds are static.
 
