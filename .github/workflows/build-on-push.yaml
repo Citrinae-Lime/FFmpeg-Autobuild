@@ -38,8 +38,8 @@ jobs:
       - name: Move ffmpeg-windows-build-helpers
         run: mv -v ./ffmpeg-windows-build-helpers/* ./
         
-      - name: Modifi config
-        run: patch < Custom_build_config.diff
+      - name: Modifi build config
+        run: patch -p1 < custom_build.patch
 
       - name: Get current date & time before build
         id: date-time-before
