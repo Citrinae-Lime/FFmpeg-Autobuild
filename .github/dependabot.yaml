@@ -3,8 +3,9 @@ updates:
   - package-ecosystem: gitsubmodule
     directory: /
     schedule:
-      interval: daily
-      time: '15:00'
+      interval: weekly
+      day: friday
+      time: '10:00'
       timezone: Africa/Ceuta
 
   - package-ecosystem: github-actions

@@ -1,26 +1,54 @@
 diff --git a/cross_compile_ffmpeg.sh b/cross_compile_ffmpeg.sh
-index 8e243278..f082d1fd 100755
+index c0963035..5b905125 100755
 --- a/cross_compile_ffmpeg.sh
 +++ b/cross_compile_ffmpeg.sh
-@@ -2345,7 +2345,7 @@ build_ffmpeg() {
+@@ -834,7 +834,7 @@ build_amd_amf_headers() {
+ 
+   cd amf_headers_git
+     if [ ! -f "already_installed" ]; then
+-      #rm -rf "./Thirdparty" # ?? plus too chatty...
++      rm -rf "./Thirdparty" # ?? plus too chatty...
+       if [ ! -d "$mingw_w64_x86_64_prefix/include/AMF" ]; then
+         mkdir -p "$mingw_w64_x86_64_prefix/include/AMF"
+       fi
+@@ -1155,15 +1155,15 @@ build_libidn2() {
+ }
+ 
+ build_gnutls() {
+-  download_and_unpack_file https://www.gnupg.org/ftp/gcrypt/gnutls/v3.6/gnutls-3.6.15.tar.xz
+-  cd gnutls-3.6.15
++  download_and_unpack_file https://www.gnupg.org/ftp/gcrypt/gnutls/v3.7/gnutls-3.7.8.tar.xz
++  cd gnutls-3.7.8
+     # --disable-cxx don't need the c++ version, in an effort to cut down on size... XXXX test size difference...
+     # --enable-local-libopts to allow building with local autogen installed,
+     # --disable-guile is so that if it finds guile installed (cygwin did/does) it won't try and link/build to it and fail...
+     # libtasn1 is some dependency, appears provided is an option [see also build_libnettle]
+     # pks #11 hopefully we don't need kit
+     apply_patch file://$patch_dir/gnutls-windows8.patch -p1 # defaults to win 8 kind of, either this or setWINNT_VER :|
+-    generic_configure "--disable-doc --disable-tools --disable-cxx --disable-tests --disable-gtk-doc-html --disable-libdane --disable-nls --enable-local-libopts --disable-guile --with-included-libtasn1 --without-p11-kit"
++    generic_configure "--disable-doc --disable-tools --disable-cxx --disable-tests --disable-gtk-doc-html --disable-libdane --disable-nls --enable-local-libopts --disable-guile --with-included-libtasn1 --without-p11-kit --with-included-unistring --disable-code-coverage"
+     do_make_and_make_install
+     if [[ $compiler_flavors != "native"  ]]; then
+       # libsrt doesn't know how to use its pkg deps :| https://github.com/Haivision/srt/issues/565
+@@ -2346,7 +2346,7 @@ build_ffmpeg() {
        local arch=x86_64
      fi
  
 -    init_options="--pkg-config=pkg-config --pkg-config-flags=--static --extra-version=ffmpeg-windows-build-helpers --enable-version3 --disable-debug --disable-w32threads"
-+    init_options="--pkg-config=pkg-config --pkg-config-flags=--static --enable-version3 --disable-debug --disable-w32threads"
++    init_options="--pkg-config=pkg-config --pkg-config-flags=--static --extra-version=FWBH --enable-version3 --disable-debug --disable-w32threads"
      if [[ $compiler_flavors != "native" ]]; then
        init_options+=" --arch=$arch --target-os=mingw32 --cross-prefix=$cross_prefix"
      else
-@@ -2358,7 +2358,7 @@ build_ffmpeg() {
+@@ -2359,7 +2359,7 @@ build_ffmpeg() {
        init_options+=" --disable-schannel"
        # Fix WinXP incompatibility by disabling Microsoft's Secure Channel, because Windows XP doesn't support TLS 1.1 and 1.2, but with GnuTLS or OpenSSL it does.  XP compat!
      fi
 -    config_options="$init_options --enable-libcaca --enable-gray --enable-libtesseract --enable-fontconfig --enable-gmp --enable-libass --enable-libbluray --enable-libbs2b --enable-libflite --enable-libfreetype --enable-libfribidi --enable-libgme --enable-libgsm --enable-libilbc --enable-libmodplug --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopus --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libvorbis --enable-libwebp --enable-libzimg --enable-libzvbi --enable-libmysofa --enable-libopenjpeg  --enable-libopenh264  --enable-libvmaf --enable-libsrt --enable-libxml2 --enable-opengl --enable-libdav1d --enable-cuda-llvm  --enable-gnutls"
-+    config_options="$init_options --enable-libcaca --enable-gray --enable-libtesseract --enable-fontconfig --enable-gmp --enable-libass --enable-libbluray --enable-libbs2b --enable-libfreetype --enable-libfribidi --enable-libgme --enable-libgsm --enable-libilbc --enable-libmp3lame --enable-libopus --disable-encoder=opus --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libvorbis --disable-encoder=vorbis --enable-libwebp --enable-libzimg --enable-libopenjpeg --enable-libopenh264 --enable-libsrt --enable-libxml2 --enable-opengl --enable-libdav1d --enable-cuda-llvm  --enable-gnutls"
++    config_options="$init_options --enable-libcaca --enable-gray --enable-libtesseract --enable-fontconfig --enable-libass --enable-libbluray --enable-libbs2b --enable-libfreetype --enable-libfribidi --enable-libgme --enable-libgsm --enable-libilbc --enable-libmp3lame --enable-libopus --disable-encoder=opus --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libvorbis --disable-encoder=vorbis --enable-libwebp --enable-libzimg --enable-libopenjpeg --enable-libopenh264 --enable-libxml2 --enable-opengl --enable-libdav1d --enable-cuda-llvm --enable-gnutls"
  
      if [[ $build_svt = y ]]; then
        if [ "$bits_target" != "32" ]; then
-@@ -2380,15 +2380,16 @@ build_ffmpeg() {
+@@ -2381,22 +2381,22 @@ build_ffmpeg() {
          fi
          config_options+=" --enable-libsvthevc"
          config_options+=" --enable-libsvtav1"
@@ -29,7 +57,6 @@ index 8e243278..f082d1fd 100755
 +        config_options+=" --enable-libsvtvp9" #not currently working but compiles if configured
        fi # else doesn't work/matter with 32 bit
      fi
-+    
 +    config_options+=" --enable-libvpx"
      config_options+=" --enable-libaom"
  
@@ -40,9 +67,21 @@ index 8e243278..f082d1fd 100755
 +    #   config_options+=" --enable-nvenc --enable-nvdec" # don't work OS X
 +    # fi
  
-     config_options+=" --extra-libs=-lharfbuzz" #  grr...needed for pre x264 build???
-     config_options+=" --extra-libs=-lm" # libflite seemed to need this linux native...and have no .pc file huh?
-@@ -2409,7 +2410,7 @@ build_ffmpeg() {
+-    config_options+=" --extra-libs=-lharfbuzz" #  grr...needed for pre x264 build???
+-    config_options+=" --extra-libs=-lm" # libflite seemed to need this linux native...and have no .pc file huh?
++    # config_options+=" --extra-libs=-lharfbuzz" #  grr...needed for pre x264 build???
++    # config_options+=" --extra-libs=-lm" # libflite seemed to need this linux native...and have no .pc file huh?
+ 
+-    if [[ $compiler_flavors != "native" ]]; then
+-      config_options+=" --extra-libs=-lshlwapi" # lame needed this, no .pc file?
+-    fi
++    # if [[ $compiler_flavors != "native" ]]; then
++    #   config_options+=" --extra-libs=-lshlwapi" # lame needed this, no .pc file?
++    # fi
+     config_options+=" --extra-libs=-lmpg123" # ditto
+     config_options+=" --extra-libs=-lpthread" # for some reason various and sundry needed this linux native
+ 
+@@ -2413,7 +2413,7 @@ build_ffmpeg() {
        config_options+=" --disable-libmfx"
      fi
      if [[ $enable_gpl == 'y' ]]; then
@@ -51,35 +90,117 @@ index 8e243278..f082d1fd 100755
        config_options+=" --enable-libxvid --enable-libdavs2"
        if [[ $host_target != 'i686-w64-mingw32' ]]; then
          config_options+=" --enable-libxavs2"
-@@ -2435,9 +2436,9 @@ build_ffmpeg() {
+@@ -2439,10 +2439,11 @@ build_ffmpeg() {
      if [[ "$non_free" = "y" ]]; then
        config_options+=" --enable-nonfree --enable-libfdk-aac"
  
 -      if [[ $compiler_flavors != "native" ]]; then
 -        config_options+=" --enable-decklink" # Error finding rpc.h in native builds even if it's available
 -      fi
+-      # other possible options: --enable-openssl [unneeded since we already use gnutls]
 +      # if [[ $compiler_flavors != "native" ]]; then
 +      #   config_options+=" --enable-decklink" # Error finding rpc.h in native builds even if it's available
 +      # fi
-       # other possible options: --enable-openssl [unneeded since we already use gnutls]
++      # other possible options: [unneeded since we already use gnutls]
++      # config_options+=" --enable-openssl"
      fi
  
-@@ -2596,10 +2597,10 @@ build_ffmpeg_dependencies() {
-   build_unistring
-   build_libidn2 # needs iconv and unistring
+     do_debug_build=n # if you need one for backtraces/examining segfaults using gdb.exe ... change this to y :) XXXX make it affect x264 too...and make it real param :)
+@@ -2584,21 +2585,21 @@ build_ffmpeg_dependencies() {
+   build_nv_headers
+   build_libzimg # Uses dlfcn.
+   build_libopenjpeg
+-  build_glew
+-  build_glfw
++  #build_glew
++  #build_glfw
+   #build_libjpeg_turbo # mplayer can use this, VLC qt might need it? [replaces libjpeg] (ffmpeg seems to not need it so commented out here)
+   build_libpng # Needs zlib >= 1.0.4. Uses dlfcn.
+   build_libwebp # Uses dlfcn.
+   build_harfbuzz
+   # harf does now include build_freetype # Uses zlib, bzip2, and libpng.
+   build_libxml2 # Uses zlib, liblzma, iconv and dlfcn.
+-  build_libvmaf
++  #build_libvmaf
+   build_fontconfig # Needs freetype and libxml >= 2.6. Uses iconv and dlfcn.
+-  build_gmp # For rtmp support configure FFmpeg with '--enable-gmp'. Uses dlfcn.
++  #build_gmp # For rtmp support configure FFmpeg with '--enable-gmp'. Uses dlfcn.
+   #build_librtmfp # mainline ffmpeg doesn't use it yet
+-  build_libnettle # Needs gmp >= 3.0. Uses dlfcn.
+-  build_unistring
+-  build_libidn2 # needs iconv and unistring
++  #build_libnettle # Needs gmp >= 3.0. Uses dlfcn.
++  #build_unistring
++  #build_libidn2 # needs iconv and unistring
    build_gnutls # Needs nettle >= 3.1, hogweed (nettle) >= 3.1. Uses libidn2, unistring, zlib, and dlfcn.
--  #if [[ "$non_free" = "y" ]]; then
--  #  build_openssl-1.0.2 # Nonfree alternative to GnuTLS. 'build_openssl-1.0.2 "dllonly"' to build shared libraries only.
--  #  build_openssl-1.1.1 # Nonfree alternative to GnuTLS. Can't be used with LibRTMP. 'build_openssl-1.1.1 "dllonly"' to build shared libraries only.
--  #fi
-+  if [[ "$non_free" = "y" ]]; then
-+   build_openssl-1.0.2 # Nonfree alternative to GnuTLS. 'build_openssl-1.0.2 "dllonly"' to build shared libraries only.
-+   build_openssl-1.1.1 # Nonfree alternative to GnuTLS. Can't be used with LibRTMP. 'build_openssl-1.1.1 "dllonly"' to build shared libraries only.
-+  fi
-   build_libogg # Uses dlfcn.
-   build_libvorbis # Needs libogg >= 1.0. Uses dlfcn.
-   build_libopus # Uses dlfcn.
-@@ -2725,24 +2726,24 @@ build_dependencies=y
+   #if [[ "$non_free" = "y" ]]; then
+   #  build_openssl-1.0.2 # Nonfree alternative to GnuTLS. 'build_openssl-1.0.2 "dllonly"' to build shared libraries only.
+@@ -2611,22 +2612,22 @@ build_ffmpeg_dependencies() {
+   build_libspeex # Uses libspeexdsp and dlfcn.
+   build_libtheora # Needs libogg >= 1.1. Needs libvorbis >= 1.0.1, sdl and libpng for test, programs and examples [disabled]. Uses dlfcn.
+   build_libsndfile "install-libgsm" # Needs libogg >= 1.1.3 and libvorbis >= 1.2.3 for external support [disabled]. Uses dlfcn. 'build_libsndfile "install-libgsm"' to install the included LibGSM 6.10.
+-  build_mpg123
+-  build_lame # Uses dlfcn, mpg123
++  #build_mpg123
++  #build_lame # Uses dlfcn, mpg123
+   build_twolame # Uses libsndfile >= 1.0.0 and dlfcn.
+-  build_libopencore # Uses dlfcn.
++  #build_libopencore # Uses dlfcn.
+   build_libilbc # Uses dlfcn.
+-  build_libmodplug # Uses dlfcn.
++  #build_libmodplug # Uses dlfcn.
+   build_libgme
+   build_libbluray # Needs libxml >= 2.6, freetype, fontconfig. Uses dlfcn.
+   build_libbs2b # Needs libsndfile. Uses dlfcn.
+   build_libsoxr
+-  build_libflite
++  #build_libflite
+   build_libsnappy # Uses zlib (only for unittests [disabled]) and dlfcn.
+-  build_vamp_plugin # Needs libsndfile for 'vamp-simple-host.exe' [disabled].
++  #build_vamp_plugin # Needs libsndfile for 'vamp-simple-host.exe' [disabled].
+   build_fftw # Uses dlfcn.
+   build_libsamplerate # Needs libsndfile >= 1.0.6 and fftw >= 0.15.0 for tests. Uses dlfcn.
+-  build_librubberband # Needs libsamplerate, libsndfile, fftw and vamp_plugin. 'configure' will fail otherwise. Eventhough librubberband doesn't necessarily need them (libsndfile only for 'rubberband.exe' and vamp_plugin only for "Vamp audio analysis plugin"). How to use the bundled libraries '-DUSE_SPEEX' and '-DUSE_KISSFFT'?
++  #build_librubberband # Needs libsamplerate, libsndfile, fftw and vamp_plugin. 'configure' will fail otherwise. Eventhough librubberband doesn't necessarily need them (libsndfile only for 'rubberband.exe' and vamp_plugin only for "Vamp audio analysis plugin"). How to use the bundled libraries '-DUSE_SPEEX' and '-DUSE_KISSFFT'?
+   build_frei0r # Needs dlfcn. could use opencv...
+   if [[ "$bits_target" != "32" && $build_svt = "y" ]]; then
+     build_svt-hevc
+@@ -2638,26 +2639,26 @@ build_ffmpeg_dependencies() {
+   build_libmysofa # Needed for FFmpeg's SOFAlizer filter (https://ffmpeg.org/ffmpeg-filters.html#sofalizer). Uses dlfcn.
+   if [[ "$non_free" = "y" ]]; then
+     build_fdk-aac # Uses dlfcn.
+-    if [[ $compiler_flavors != "native" ]]; then
+-      build_libdecklink # Error finding rpc.h in native builds even if it's available
+-    fi
++    #if [[ $compiler_flavors != "native" ]]; then
++    #  build_libdecklink # Error finding rpc.h in native builds even if it's available
++    #fi
+   fi
+-  build_zvbi # Uses iconv, libpng and dlfcn.
++  #build_zvbi # Uses iconv, libpng and dlfcn.
+   build_fribidi # Uses dlfcn.
+   build_libass # Needs freetype >= 9.10.3 (see https://bugs.launchpad.net/ubuntu/+source/freetype1/+bug/78573 o_O) and fribidi >= 0.19.0. Uses fontconfig >= 2.10.92, iconv and dlfcn.
+ 
+   build_libxvid # FFmpeg now has native support, but libxvid still provides a better image.
+-  build_libsrt # requires gnutls, mingw-std-threads
+-  build_libaribb24
++  #build_libsrt # requires gnutls, mingw-std-threads
++  #build_libaribb24
+   build_libtesseract
+-  build_lensfun  # requires png, zlib, iconv
++  #build_lensfun  # requires png, zlib, iconv
+   # build_libtensorflow # broken
+   build_libvpx
+   build_libx265
+   build_libopenh264
+   build_libaom
+   build_dav1d
+-  build_avisynth
++  #build_avisynth
+   build_libx264 # at bottom as it might internally build a copy of ffmpeg (which needs all the above deps...
+  }
+ 
+@@ -2729,24 +2730,24 @@ build_dependencies=y
  git_get_latest=y
  prefer_stable=y # Only for x264 and x265.
  build_intel_qsv=y # note: not windows xp friendly!
@@ -105,20 +226,20 @@ index 8e243278..f082d1fd 100755
 -#fi
 +flags=$(cat /proc/cpuinfo | grep flags)
 +if [[ $flags =~ "ssse3" ]]; then # See https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html, https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html and https://stackoverflow.com/questions/19689014/gcc-difference-between-o3-and-os.
-+ original_cflags='-march=core2 -O2'
++  original_cflags='-march=core2 -O2'
 +elif [[ $flags =~ "sse3" ]]; then
-+ original_cflags='-march=prescott -O2'
++  original_cflags='-march=prescott -O2'
 +elif [[ $flags =~ "sse2" ]]; then
-+ original_cflags='-march=pentium4 -O2'
++  original_cflags='-march=pentium4 -O2'
 +elif [[ $flags =~ "sse" ]]; then
-+ original_cflags='-march=pentium3 -O2 -mfpmath=sse -msse'
++  original_cflags='-march=pentium3 -O2 -mfpmath=sse -msse'
 +else
-+ original_cflags='-mtune=generic -O2'
++  original_cflags='-mtune=generic -O2'
 +fi
  ffmpeg_git_checkout_version=
  build_ismindex=n
  enable_gpl=y
-@@ -2763,7 +2764,7 @@ while true; do
+@@ -2767,7 +2768,7 @@ while true; do
        --x265-git-checkout-version=[master] if you want to build a particular version of x265, ex: --x265-git-checkout-version=Release_3.2 or a specific git hash
        --fdk-aac-git-checkout-version= if you want to build a particular version of fdk-aac, ex: --fdk-aac-git-checkout-version=v2.0.1 or another tag
        --gcc-cpu-count=[number of cpu cores set it higher than 1 if you have multiple cores and > 1GB RAM, this speeds up initial cross compiler build. FFmpeg build uses number of cores no matter what]
